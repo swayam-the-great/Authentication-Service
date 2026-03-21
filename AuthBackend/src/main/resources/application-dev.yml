@@ -1,0 +1,108 @@
+# ==========================================================
+# SERVER CONFIGURATION
+# ==========================================================
+server:
+  port: 8081  # Port where Spring Boot application will run
+
+
+# ==========================================================
+# SPRING CONFIGURATION
+# ==========================================================
+spring:
+
+  # --------------------------------------------------------
+  # DATABASE CONFIGURATION
+  # --------------------------------------------------------
+  datasource:
+    url: jdbc:mysql://localhost:3306/twitter
+    username: root
+    password: swayam12
+
+    # Optional HikariCP connection pool configuration
+    # hikari:
+    #   pool-name: HikariCP
+    #   maximum-pool-size: 5
+    #   connection-timeout: 10000
+    #   idle-timeout: 600000
+    #   max-lifetime: 1800000
+    #   validation-timeout: 1800000
+    #   leak-detection-threshold: 0
+    #   initialization-fail-timeout: -1
+
+
+  # --------------------------------------------------------
+  # JPA / HIBERNATE CONFIGURATION
+  # --------------------------------------------------------
+  jpa:
+    hibernate:
+      ddl-auto: update      # Automatically update database schema
+    show-sql: true          # Show SQL queries in console
+    properties:
+      hibernate:
+        format_sql: true    # Pretty format SQL queries
+
+
+  # --------------------------------------------------------
+  # OAUTH2 LOGIN CONFIGURATION
+  # --------------------------------------------------------
+  security:
+    oauth2:
+      client:
+        registration:
+
+          # Google OAuth2 configuration
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:test-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:test-client-secret}
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - email
+              - profile
+              - openid
+
+          # Github OAuth2 configuration
+          github:
+            client-id: ${GITHUB_CLIENT_ID:test-client-id}
+            client-secret: ${GITHUB_CLIENT_SECRET:test-client-secret}
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - user:email
+              - read:user
+
+
+# ==========================================================
+# LOGGING CONFIGURATION
+# ==========================================================
+logging:
+  level:
+    org.springframework.security: DEBUG   # Enable detailed Spring Security logs
+
+
+# ==========================================================
+# JWT SECURITY CONFIGURATION (CUSTOM)
+# ==========================================================
+security:
+  jwt:
+    secret: ${JWT_SECRET:9f7b2c1e4a6d8f0avuvhjhh3b5c7d9e2f4a6c8b1d3e5f7a9c2e4b6d8f1a3c5e7b9d2f4}  # Default secret key (should be overridden in production)
+    issuer: ${JWT_ISSUER:api.twitter.com}
+
+    # Token expiration times
+    access-ttl-seconds: ${JWT_ACCESS_TTL_SECONDS:3600}     # 1 hour
+    refresh-ttl-seconds: ${JWT_REFRESH_TTL_SECONDS:86400}  # 24 hours
+
+    # Refresh token cookie settings
+    refresh-token-cookie-name: ${JWT_REFRESH_COOKIE_NAME:refreshToken}
+    cookie-secure: ${JWT_COOKIE_SECURE:true}
+    cookie-http-only: ${JWT_COOKIE_HTTP_ONLY:true}
+    cookie-same-site: ${JWT_COOKIE_SAME_SITE:lax}
+    cookie-domain: ${JWT_COOKIE_DOMAIN:localhost}
+
+
+# ==========================================================
+# APPLICATION CUSTOM PROPERTIES
+# ==========================================================
+app:
+  auth:
+    frontend:
+      success-redirect: http://localhost:5173/auth/success
+      failure-redirect: http://localhost:5173/auth/failure

@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: AuthBackend
+  profiles:
+    active: dev
+
+
+server:
+  port: 8081
+
+
+#configurations
+#database configurations
+
+#mysql configurations
+
+
+
+#email configurations
+
+#oauth2 configurations
