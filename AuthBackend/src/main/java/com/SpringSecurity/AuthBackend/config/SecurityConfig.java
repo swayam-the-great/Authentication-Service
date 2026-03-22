@@ -39,7 +39,7 @@ import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
+
 public class SecurityConfig {
 
         /*
@@ -49,7 +49,7 @@ public class SecurityConfig {
          */
 
         private final JwtAuthenticationFilter jwtAuthenticationFilter;
-        // private final AuthenticationSuccessHandler successHandler;
+        private final AuthenticationSuccessHandler successHandler;
 
         /*
          * =========================================================
@@ -57,13 +57,12 @@ public class SecurityConfig {
          * =========================================================
          */
 
-        // public SecurityConfig(
-        // JwtAuthenticationFilter jwtAuthenticationFilter,
-        // AuthenticationSuccessHandler successHandler
-        // ) {
-        // this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        // this.successHandler = successHandler;
-        // }
+        public SecurityConfig(
+                        JwtAuthenticationFilter jwtAuthenticationFilter,
+                        AuthenticationSuccessHandler successHandler) {
+                this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+                this.successHandler = successHandler;
+        }
 
         /*
          * =========================================================
@@ -93,6 +92,10 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+                                /* ---------------- OAUTH2 LOGIN ---------------- */
+                                .oauth2Login(oauth2 -> oauth2.successHandler(successHandler)
+                                                .failureHandler(null))
+                                .logout(AbstractHttpConfigurer::disable)
                                 /* ---------------- EXCEPTION HANDLING ---------------- */
 
                                 .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, e) -> {
@@ -179,3 +182,7 @@ public class SecurityConfig {
          */
 
 }
+
+// .authorizeHttpRequests(auth -> auth
+// .requestMatchers("/api/v1/auth/**").permitAll()
+// .anyRequest().authenticated())

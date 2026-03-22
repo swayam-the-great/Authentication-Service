@@ -9,14 +9,18 @@ server:
 # SPRING CONFIGURATION
 # ==========================================================
 spring:
+  application:
+    name: AuthBackend
+  config:
+    import: optional:file:.env[.properties],optional:file:AuthBackend/.env[.properties]
 
   # --------------------------------------------------------
   # DATABASE CONFIGURATION
   # --------------------------------------------------------
   datasource:
-    url: jdbc:mysql://localhost:3306/twitter
-    username: root
-    password: swayam12
+    url: ${DB_URL:jdbc:mysql://localhost:3306/twitter}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
 
     # Optional HikariCP connection pool configuration
     # hikari:
@@ -104,5 +108,5 @@ security:
 app:
   auth:
     frontend:
-      success-redirect: http://localhost:5173/auth/success
-      failure-redirect: http://localhost:5173/auth/failure
+      success-redirect: ${FRONTEND_SUCCESS_REDIRECT:http://localhost:5173/auth/success}
+      failure-redirect: ${FRONTEND_FAILURE_REDIRECT:http://localhost:5173/auth/failure}
