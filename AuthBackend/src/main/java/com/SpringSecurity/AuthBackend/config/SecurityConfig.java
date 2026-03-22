@@ -84,7 +84,7 @@ public class SecurityConfig {
                                 /* ---------------- AUTHORIZATION RULES ---------------- */
 
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/api/v1/auth/**").permitAll()
+                                                .requestMatchers(AppConstants.AUTH_PUBLIC_URLS).permitAll()
                                                 .anyRequest().authenticated())
 
                                 /* ---------------- SESSION POLICY ---------------- */
