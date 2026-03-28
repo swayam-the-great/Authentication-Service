@@ -2,8 +2,10 @@ package com.SpringSecurity.AuthBackend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -19,12 +21,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.SpringSecurity.AuthBackend.dtos.ApiError;
 import com.SpringSecurity.AuthBackend.security.JwtAuthenticationFilter;
 
-import lombok.RequiredArgsConstructor;
 import tools.jackson.databind.ObjectMapper;
+
+import java.util.Arrays;
+import java.util.List;
 
 /* =========================================================
                     SPRING SECURITY CONFIGURATION
@@ -50,6 +57,7 @@ public class SecurityConfig {
 
         private final JwtAuthenticationFilter jwtAuthenticationFilter;
         private final AuthenticationSuccessHandler successHandler;
+        private final List<String> allowedOrigins;
 
         /*
          * =========================================================
@@ -59,9 +67,14 @@ public class SecurityConfig {
 
         public SecurityConfig(
                         JwtAuthenticationFilter jwtAuthenticationFilter,
-                        AuthenticationSuccessHandler successHandler) {
+                        AuthenticationSuccessHandler successHandler,
+                        @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173}") String allowedOrigins) {
                 this.jwtAuthenticationFilter = jwtAuthenticationFilter;
                 this.successHandler = successHandler;
+                this.allowedOrigins = Arrays.stream(allowedOrigins.split(","))
+                                .map(String::trim)
+                                .filter(origin -> !origin.isBlank())
+                                .toList();
         }
 
         /*
@@ -84,6 +97,7 @@ public class SecurityConfig {
                                 /* ---------------- AUTHORIZATION RULES ---------------- */
 
                                 .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers(AppConstants.AUTH_PUBLIC_URLS).permitAll()
                                                 .anyRequest().authenticated())
 
@@ -152,6 +166,20 @@ public class SecurityConfig {
         @Bean
         public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
                 return configuration.getAuthenticationManager();
+        }
+
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                var configuration = new CorsConfiguration();
+                configuration.setAllowedOriginPatterns(allowedOrigins);
+                configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+                configuration.setAllowedHeaders(List.of("*"));
+                configuration.setAllowCredentials(true);
+                configuration.setExposedHeaders(List.of("Authorization"));
+
+                var source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
         }
 
         /*
